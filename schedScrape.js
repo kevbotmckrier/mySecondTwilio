@@ -77,13 +77,17 @@ request(scheduleUrl, function(err, resp, body) {
 	ntv[i] = $(this).attr('src');
     });	
     
-
+	//Processes the img src to pull out the network
     for(i = 0; i < ntv.length; i++){
 	ntv[i] = ntv[i].slice(ntv[i].indexOf("_")+1,ntv[i].length-4);
     }
-
+	
+	
     connection.connect();
-
+	
+	//Loop through previously built arrays to add each record to the db
+	//There is a homeTeam/gameTime index established so any duplicates on that
+	//will simply result in the network information being updated
     for(i = 0; i < dates.length; i++){
 	
 	connection.query("INSERT `buzzword_nbastandings`.`natTv` (`gameDate`,`awayTeam`,`homeTeam`,`gameTime`,`network`) VALUES ('" + new Date(dates[i]).toISOString() + "','" + awayTeams[i] + "','" + homeTeams[i] + "','" + times[i] + "','" + ntv[i] + "') ON DUPLICATE KEY UPDATE `network` = '" + ntv[i] + "';");
