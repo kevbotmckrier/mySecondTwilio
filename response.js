@@ -27,6 +27,12 @@ http.createServer(function(request,response) {
         
 	});
 	
+    } else {
+	
+	//everything coming in from Twilio should be a POST request
+	//so kill everything that isn't
+	request.connection.destroy();
+
     }
     
     //when the request is done begin processing
@@ -84,6 +90,7 @@ http.createServer(function(request,response) {
 connection.on('close', function(err){
     if(err){
 	//connection closed unexpectedly, reconnect
+	connection.log('auto reconnected');
 	connection = mysql.createConnection(connection.config);
     }
 });
