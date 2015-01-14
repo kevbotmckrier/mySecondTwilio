@@ -55,6 +55,12 @@ http.createServer(function(request,response) {
 	    //then loop through them in the callback to add them to the message
 	    connection.query("SELECT * FROM `buzzword_nbastandings`.`natTv` WHERE `gameDate` = '" + gameDate.format('YYYY-MM-DD') + "' AND `network` != 'NBALP';", function(err, rows, fields){
 		if(rows.length > 0){
+		  
+		    rows.sort(function(a,b){
+			return (a['gameTime'].split(':')[0] + a['gameTime'].split(':')[1].slice(0,2)) - (b['gameTime'].split(':')[0] + b['gameTime'].split(':')[1].slice(0,2));
+		    });
+
+
 		    for(i=0; i<rows.length; i++){
 			response.write(rows[i]['awayTeam'] + ' @ ' + rows[i]['homeTeam'] + ': ' + rows[i]['gameTime'] + ' ET on ' + rows[i]['network']);
 			if(i+1!=rows.length){response.write(', ');}
@@ -74,5 +80,12 @@ http.createServer(function(request,response) {
     });
 
 }).listen(12476);
+
+connection.on('close', function(err){
+    if(err){
+	//connection closed unexpectedly, reconnect
+	connection = mysql.createConnection(connection.config);
+    }
+});
 
 
