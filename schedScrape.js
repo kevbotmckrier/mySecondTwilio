@@ -8,13 +8,13 @@ var scheduleUrl = "http://www.nba.com/schedules/national_tv_schedule/";
 
 //Establish connection to MySQL database
 var connection = mysql.createConnection({
-	host: process.env.nbaSchedHost,
-	user: process.env.nbaSchedUser,
-	password: process.env.nbaSchedPassword
+    host: process.env.nbaSchedHost,
+    user: process.env.nbaSchedUser,
+    password: process.env.nbaSchedPassword
 });
 
 request(scheduleUrl, function(err, resp, body) {
-	
+    
     var begin = body.indexOf('<table');
     var end = body.lastIndexOf('</table');
     
@@ -77,20 +77,32 @@ request(scheduleUrl, function(err, resp, body) {
 	ntv[i] = $(this).attr('src');
     });	
     
-	//Processes the img src to pull out the network
+
     for(i = 0; i < ntv.length; i++){
 	ntv[i] = ntv[i].slice(ntv[i].indexOf("_")+1,ntv[i].length-4);
     }
+
+    var hours = 0;
+    var minutes = 0;
+
+    for(i=0; i<times.length; i++){
+	if(times[i].slice(-2)=='pm'){
+	    var hours = +times[i].split(":")[0]+12;
+	} else {
+	    var hours = +times[i].split(":")[0];
+	}
 	
+	var minutes = times[i].split(":")[1].slice(0,2);
 	
+	times[i] = hours + ':' + minutes;
+
+    }
+
     connection.connect();
-	
-	//Loop through previously built arrays to add each record to the db
-	//There is a homeTeam/gameTime index established so any duplicates on that
-	//will simply result in the network information being updated
+
     for(i = 0; i < dates.length; i++){
 	
-	connection.query("INSERT `buzzword_nbastandings`.`natTv` (`gameDate`,`awayTeam`,`homeTeam`,`gameTime`,`network`) VALUES ('" + new Date(dates[i]).toISOString() + "','" + awayTeams[i] + "','" + homeTeams[i] + "','" + times[i] + "','" + ntv[i] + "') ON DUPLICATE KEY UPDATE `network` = '" + ntv[i] + "';");
+	connection.query("INSERT `buzzword_nbastandings`.`natTvTest` (`gameDate`,`awayTeam`,`homeTeam`,`gameTime`,`network`) VALUES ('" + new Date(dates[i]).toISOString() + "','" + awayTeams[i] + "','" + homeTeams[i] + "','" + times[i] + "','" + ntv[i] + "') ON DUPLICATE KEY UPDATE `network` = '" + ntv[i] + "';");
 
     }
 
