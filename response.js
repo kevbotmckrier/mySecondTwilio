@@ -3,17 +3,21 @@ var qs = require('querystring');
 var moment = require('moment');
 var http = require('http');
 var mysql = require('mysql');
+var twilio = require('twilio');
+var tzSet = require('./tzSet.js');
+var responses = require('./gameRespond.js');
 
 //create mysql connection
 var connection = mysql.createConnection({
-	host: process.env.nbaSchedHost,
-	user: process.env.nbaSchedUser,
-	password: process.env.nbaSchedPassword
+    host: process.env.nbaSchedHost,
+    user: process.env.nbaSchedUser,
+    password: process.env.nbaSchedPassword,
+    multipleStatements: true
 });
 
 //create server with callback
 http.createServer(function(request,response) {
-	
+    
     //check to see if it's POST method. I believe all incoming twilio texts should
     //POST method but it can't hurt
     if (request.method == 'POST') {
@@ -24,7 +28,7 @@ http.createServer(function(request,response) {
             body += data;
 
             if (body.length > 1e6) request.connection.destroy();
-        
+            
 	});
 	
     } else {
@@ -37,62 +41,41 @@ http.createServer(function(request,response) {
     
     //when the request is done begin processing
     request.on('end', function () {
-		
+	
+	//setup twiml response
+	var resp = new twilio.TwimlResponse();
+	
 	//parse the POST data and put the body in a variable.
 	//could just use post['Body'] again later instead
 	var post = qs.parse(body);
-	var bodyText = post['Body'];		
+	if(post['Body']){var bodyText = post['Body'];} else {bodyText='gibberish';}
+	if(post['From']){var fromNum = '+' + post['From'].slice(1,post['From'].length);}
 	
-	//Add the ecoding and the beginning of the header to the response.
+	//Add the encoding to the response
 	response.writeHead(200, {"Content-Type": "text/xml"}); 
-	response.write('<?xml version="1.0" encoding="UTF-8"?>');
-	response.write('<Response><Message>');
 	
-	//Check to see if it's a valid date
-	var gameDate = moment(new Date(bodyText));
-	
-	if(gameDate.isAfter('2015-04-15')||gameDate.isBefore('2015-01-01')||gameDate.format()=='Invalid date'){
-	    response.write('Cannot process that date, sorry. :-/');
-	    response.write('</Message></Response>');	
-	    response.end();
-	} else {
-
-	    //Query the MySQL db for games on the selected day and
-	    //then loop through them in the callback to add them to the message
-	    connection.query("SELECT * FROM `buzzword_nbastandings`.`natTv` WHERE `gameDate` = '" + gameDate.format('YYYY-MM-DD') + "' AND `network` != 'NBALP';", function(err, rows, fields){
-		if(rows.length > 0){
-		  
-		    rows.sort(function(a,b){
-			return (a['gameTime'].split(':')[0] + a['gameTime'].split(':')[1].slice(0,2)) - (b['gameTime'].split(':')[0] + b['gameTime'].split(':')[1].slice(0,2));
-		    });
-
-
-		    for(i=0; i<rows.length; i++){
-			response.write(rows[i]['awayTeam'] + ' @ ' + rows[i]['homeTeam'] + ': ' + rows[i]['gameTime'] + ' ET on ' + rows[i]['network']);
-			if(i+1!=rows.length){response.write(', ');}
-		    }
-		} else {
-		    response.write('There are no nationally televised games that day.');
-		}
+	if(bodyText.slice(0,2).toUpperCase() == 'TZ' & fromNum){
 	    
-		response.write('</Message></Response>');	
-		response.end();
+	    tzSet.setter(bodyText,fromNum,response,resp,connection);
 
-	    });
-	
-	}  
-	
+	} else {
+	    
+	    //Check to see if it's a valid date
+	    var gameDate = moment(new Date(bodyText));
+	    
+	    responses.respondGames(gameDate,fromNum,response,connection,resp);	
+	    
+	}
 
     });
 
 }).listen(12476);
 
 connection.on('close', function(err){
-    if(err){
-	//connection closed unexpectedly, reconnect
-	connection.log('auto reconnected');
-	connection = mysql.createConnection(connection.config);
-    }
-});
+    
+    //connection closed unexpectedly, reconnect
+    connection.log('auto reconnected');
+    connection = mysql.createConnection(connection.config);
 
+});
 
