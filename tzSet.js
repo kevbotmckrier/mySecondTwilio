@@ -1,4 +1,4 @@
-exports.setter = function(bodyText,fromNum,response,resp,connection){
+exports.setter = function(bodyText,fromNum,response,connection){
 
     var timeZone = '';
     var timeOffset = 0;
@@ -18,7 +18,7 @@ exports.setter = function(bodyText,fromNum,response,resp,connection){
 	timeZone = 'PT';
 	timeOffset = 3;
     } else {
-	resp.message("Couldn't parse your time zone. Please try again");
+	response.write("Couldn't parse your time zone. Please try again");
     }
 
     if(timeZone.length>0){
@@ -27,10 +27,11 @@ exports.setter = function(bodyText,fromNum,response,resp,connection){
 
 	connection.query(sqlInsert,function(err,rows){});
 
-	resp.message("Time Zone preference saved.");
-
+	response.write('Time Zone preference saved.');
+	response.write('</Message></Response>');
+	
     }
 
-    response.end(resp.toString());
+    response.end();
 
 }

@@ -1,4 +1,4 @@
-exports.respondGames = function(gameDate,fromNum,response,connection,resp){
+exports.respondGames = function(gameDate,fromNum,response,connection){
 
     //Setup SQL queries
     var gamesQuery = "SELECT * FROM `buzzword_nbastandings`.`natTvTest` WHERE `gameDate` = '" + gameDate.format('YYYY-MM-DD') + "' AND `network` != 'NBALP';";
@@ -7,8 +7,9 @@ exports.respondGames = function(gameDate,fromNum,response,connection,resp){
     if(gameDate.isAfter('2015-04-15')||gameDate.isBefore('2015-01-01')||gameDate.format()=='Invalid date'){
 
 	//if date is out of range or in a format i can't process the request gets ended
-	resp.message('Cannot process that date, sorry. :-/');
-	response.end(resp.toString());
+	response.write('Cannot process that date, sorry. :-/');
+	response.write('</Message></Response>)');
+	response.end();
 
     } else {
 
@@ -27,8 +28,10 @@ exports.respondGames = function(gameDate,fromNum,response,connection,resp){
 		timeOffset = results[1][0]['timeOffset'];
 		timeZone = results[1][0]['timeZone'];
 	    } else {
-		console.log('hello?');
-		resp.message('To set a time zone preference, send a text beginning with TZ and containing your preferred time zone. (Continental US only)');
+
+		response.write('To set a time zone preference, send a text beginning with TZ and containing your preferred time zone. (Continental US only)');
+		response.write('</Message><Message>');
+
 	    }
 	    
 	    //If we have a result, sort it, then build the response and send it
@@ -60,16 +63,17 @@ exports.respondGames = function(gameDate,fromNum,response,connection,resp){
 		    
 		}
 		
-		resp.message(gameResp);
+		response.write(gameResp);
 		
 	    } else {
 
 		//If we don't have a result, let the user down easy.
-		resp.message('Unfortunately there are no nationally televised games that day.');
+		response.write('Unfortunately there are no nationally televised games that day.');
 
 	    }
 	    
-	    response.end(resp.toString());
+	    response.write('</Message></Response>');
+	    response.end();
 
 	});
 
