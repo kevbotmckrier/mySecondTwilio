@@ -8,7 +8,7 @@ exports.respondGames = function(gameDate,fromNum,response,connection){
 
 	//if date is out of range or in a format i can't process the request gets ended
 	response.write('Cannot process that date, sorry. :-/');
-	response.write('</Message></Response>)');
+	response.write('</Message></Response>');
 	response.end();
 
     } else {
