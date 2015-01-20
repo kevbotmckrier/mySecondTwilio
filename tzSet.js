@@ -23,7 +23,7 @@ exports.setter = function(bodyText,fromNum,response,resp,connection){
 
     if(timeZone.length>0){
 	
-	var sqlInsert = "INSERT INTO `buzzword_nbastandings`.`schedUsers` (`userNumber`,`timeZone`,`timeOffset`) VALUES ('" + fromNum + "','" + timeZone + "','" + timeOffset + "');";
+	var sqlInsert = "INSERT INTO `buzzword_nbastandings`.`schedUsers` (`userNumber`,`timeZone`,`timeOffset`) VALUES ('" + fromNum + "','" + timeZone + "','" + timeOffset + "') ON DUPLICATE KEY UPDATE `timeZone` = '" + timeZone + "', `timeOffset` = '" + timeOffset + "';";
 
 	connection.query(sqlInsert,function(err,rows){});
 

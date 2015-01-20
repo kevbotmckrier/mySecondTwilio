@@ -52,9 +52,9 @@ http.createServer(function(request,response) {
 	if(post['From']){var fromNum = '+' + post['From'].slice(1,post['From'].length);}
 	
 	//Add the encoding to the response
-	response.writeHead(200, {"Content-Type": "text/xml"}); 
-	
-	if(bodyText.slice(0,2).toUpperCase() == 'TZ' & fromNum){
+	response.writeHead(200, {"Content-Type": "text/xml"});
+
+	if((bodyText.slice(0,2).toUpperCase() == 'TZ') && fromNum){
 	    
 	    tzSet.setter(bodyText,fromNum,response,resp,connection);
 
