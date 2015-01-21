@@ -43,8 +43,12 @@ exports.respondGames = function(gameDate,fromNum,response,pool){
 
 		//Adjust gametimes, and reformat them
 		for(i = 0; i < results[0].length; i++){
-		    
-		    results[0][i]['gameTime'] = (results[0][i]['gameTime'].slice(0,2) - timeOffset) + results[0][i]['gameTime'].slice(-3);
+
+		    console.log(results[0][i]['gameTime']);		    
+		    console.log(results[0][i]['gameTime'].slice(0,2) - timeOffset);
+		    console.log(results[0][i]['gameTime'].slice(-3));
+
+		    results[0][i]['gameTime'] = (results[0][i]['gameTime'].slice(0,2) - timeOffset) + results[0][i]['gameTime'].slice(2,5);
 		    
 		    if(results[0][i]['gameTime'].slice(0,2) + results[0][i]['gameTime'].slice(-2) > 1200){
 			results[0][i]['gameTime'] = results[0][i]['gameTime'].slice(0,2) - 12 + results[0][i]['gameTime'].slice(2,5) + ' pm';
