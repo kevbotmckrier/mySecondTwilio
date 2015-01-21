@@ -1,4 +1,4 @@
-exports.respondGames = function(gameDate,fromNum,response,connection){
+exports.respondGames = function(gameDate,fromNum,response,pool){
 
     //Setup SQL queries
     var gamesQuery = "SELECT * FROM `buzzword_nbastandings`.`natTvTest` WHERE `gameDate` = '" + gameDate.format('YYYY-MM-DD') + "' AND `network` != 'NBALP';";
@@ -18,7 +18,7 @@ exports.respondGames = function(gameDate,fromNum,response,connection){
 	//
 	//Really got add some santiation of inputs now that I'm allowing multiple queries
 	//Alternatively I could start using promises and chain the queries, but that sounds more out of my element
-	connection.query(gamesQuery + userQuery, function(err, results){
+	pool.query(gamesQuery + userQuery, function(err, results){
 	    
 	    //set defaults, then adjust if we have a viable user
 	    var timeOffset = 0;

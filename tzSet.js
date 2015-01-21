@@ -1,4 +1,4 @@
-exports.setter = function(bodyText,fromNum,response,connection){
+exports.setter = function(bodyText,fromNum,response,pool){
 
     var timeZone = '';
     var timeOffset = 0;
@@ -25,7 +25,7 @@ exports.setter = function(bodyText,fromNum,response,connection){
 	
 	var sqlInsert = "INSERT INTO `buzzword_nbastandings`.`schedUsers` (`userNumber`,`timeZone`,`timeOffset`) VALUES ('" + fromNum + "','" + timeZone + "','" + timeOffset + "') ON DUPLICATE KEY UPDATE `timeZone` = '" + timeZone + "', `timeOffset` = '" + timeOffset + "';";
 
-	connection.query(sqlInsert,function(err,rows){});
+	pool.query(sqlInsert,function(err,rows){});
 
 	response.write('Time Zone preference saved.');
 	response.write('</Message></Response>');

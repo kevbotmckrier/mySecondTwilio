@@ -8,7 +8,8 @@ var tzSet = require('./tzSet.js');
 var responses = require('./gameRespond.js');
 
 //create mysql connection
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+    connectionLimit: 10,
     host: process.env.nbaSchedHost,
     user: process.env.nbaSchedUser,
     password: process.env.nbaSchedPassword,
@@ -27,7 +28,7 @@ http.createServer(function(request,response) {
 	request.on('data', function (data) {
             body += data;
 
-            if (body.length > 1e6) request.connection.destroy();
+            if (body.length > 1e6) request.pool.destroy();
             
 	});
 	
@@ -35,7 +36,7 @@ http.createServer(function(request,response) {
 	
 	//everything coming in from Twilio should be a POST request
 	//so kill everything that isn't
-	request.connection.destroy();
+	request.pool.destroy();
 
     }
     
@@ -55,25 +56,17 @@ http.createServer(function(request,response) {
 
 	if((bodyText.slice(0,2).toUpperCase() == 'TZ') && fromNum){
 	    
-	    tzSet.setter(bodyText,fromNum,response,connection);
+	    tzSet.setter(bodyText,fromNum,response,pool);
 
 	} else {
 	    
 	    //Check to see if it's a valid date
 	    var gameDate = moment(new Date(bodyText));
-	    responses.respondGames(gameDate,fromNum,response,connection);	
+	    responses.respondGames(gameDate,fromNum,response,pool);	
 	    
 	}
 
     });
 
 }).listen(12476);
-
-connection.on('close', function(err){
-    
-    //connection closed unexpectedly, reconnect
-    connection.log('auto reconnected');
-    connection = mysql.createConnection(connection.config);
-
-});
 
