@@ -1,6 +1,6 @@
 mySecondTwilio
 ==============
-Returns national tv schedule information for a date vtexted in via the Twilio API.
+Returns national tv schedule information for a date texted in via the Twilio API. Acceptable date formats include: 1/31/15, 1-31-15, Jan 31 15, January 31 15, Jan 31, 2015.
 
 Time zone preference can be set by texting in TZ and then PT, Pacific, MT, Mountain, CT, Central, ET, or Eastern.
 
